@@ -32,4 +32,35 @@ router.get("/", async (req, res) => {
 
 })
 
+router.get("/:id/usage", async (req, res) => {
+
+    const tenantId = Number(req.params.id)
+
+    const vms = await prisma.vM.findMany({
+        where: { tenantId }
+    })
+
+    const vmIds = vms.map(v => v.id)
+
+    const metrics = await prisma.vMMetric.findMany({
+        where: {
+            vmId: { in: vmIds }
+        }
+    })
+
+    const cpu =
+        metrics.reduce((s, m) => s + m.cpuUsage, 0)
+
+    const ram =
+        metrics.reduce((s, m) => s + m.ramUsage, 0)
+
+    res.json({
+        tenantId,
+        vmCount: vms.length,
+        cpuUsage: cpu,
+        ramUsage: ram
+    })
+
+})
+
 module.exports = router

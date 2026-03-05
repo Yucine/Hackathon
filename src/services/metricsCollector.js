@@ -1,7 +1,6 @@
 const prisma = require("../prisma")
 const docker = require("../docker")
 const ws = require("../ws")
-const clusterService = require("./clusterService")
 
 async function collectMetrics() {
 
@@ -33,19 +32,27 @@ async function collectMetrics() {
                 100
 
             const memory =
-                stats.memory_stats.usage /
-                1024 /
-                1024
+                stats.memory_stats.usage / 1024 / 1024
 
-            metrics.push({
+            const metric = {
                 vmId: vm.id,
-                name: vm.name,
-                cpu: cpu.toFixed(2),
+                cpu: cpu ? cpu.toFixed(2) : 0,
                 ram: memory.toFixed(2)
+            }
+
+            metrics.push(metric)
+
+            await prisma.vMMetric.create({
+                data: {
+                    vmId: vm.id,
+                    nodeId: vm.nodeId,
+                    cpuUsage: parseFloat(metric.cpu),
+                    ramUsage: parseFloat(metric.ram)
+                }
             })
 
-        } catch (e) {
-            console.log("Metrics error", e.message)
+        } catch (err) {
+            console.log(err.message)
         }
 
     }
@@ -54,12 +61,7 @@ async function collectMetrics() {
         type: "metrics",
         data: metrics
     })
-    const clusterStats = await clusterService.getClusterStats()
 
-    ws.broadcast({
-        type: "cluster",
-        data: clusterStats
-    })
 }
 
 setInterval(collectMetrics, 1000)

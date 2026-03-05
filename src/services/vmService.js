@@ -99,9 +99,27 @@ async function createVM(data) {
 }
 async function startVM(id) {
 
-    const vm = await prisma.vM.findUnique({ where: { id } })
+    const vm = await prisma.vM.findUnique({
+        where: { id }
+    })
+
+    if (!vm) {
+        throw new Error("VM not found")
+    }
 
     const container = docker.getContainer(vm.containerId)
+
+    const info = await container.inspect()
+
+    // если контейнер уже запущен
+    if (info.State.Running) {
+
+        return prisma.vM.update({
+            where: { id },
+            data: { status: "running" }
+        })
+
+    }
 
     await container.start()
 

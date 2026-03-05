@@ -53,4 +53,20 @@ router.get("/vm/:id", async (req, res) => {
 
 })
 
+router.get("/vm/:id/history", async (req, res) => {
+
+    const metrics = await prisma.vMMetric.findMany({
+        where: {
+            vmId: Number(req.params.id)
+        },
+        orderBy: {
+            createdAt: "asc"
+        },
+        take: 60
+    })
+
+    res.json(metrics)
+
+})
+
 module.exports = router

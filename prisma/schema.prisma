@@ -30,6 +30,8 @@ model ComputeNode {
  ramUsed  Int @default(0)
 
  vms      VM[]
+
+ metrics  VMMetric[]   // ← добавили
 }
 
 model Network {
@@ -64,4 +66,21 @@ model VM {
 
  networkId   Int?
  network     Network? @relation(fields: [networkId], references: [id])
+
+ metrics     VMMetric[]   // ← добавили
+}
+
+model VMMetric {
+ id        Int @id @default(autoincrement())
+
+ vmId      Int
+ vm        VM @relation(fields: [vmId], references: [id])
+
+ nodeId    Int?
+ node      ComputeNode? @relation(fields: [nodeId], references: [id])
+
+ cpuUsage  Float
+ ramUsage  Float
+
+ createdAt DateTime @default(now())
 }
