@@ -1,0 +1,67 @@
+generator client {
+ provider = "prisma-client-js"
+}
+
+datasource db {
+ provider = "sqlite"
+ url      = env("DATABASE_URL")
+}
+
+model Tenant {
+ id        Int @id @default(autoincrement())
+ name      String
+
+ cpuQuota  Int
+ ramQuota  Int
+ diskQuota Int
+
+ vms       VM[]
+ networks  Network[]
+}
+
+model ComputeNode {
+ id       Int @id @default(autoincrement())
+ name     String
+
+ cpuTotal Int
+ ramTotal Int
+
+ cpuUsed  Int @default(0)
+ ramUsed  Int @default(0)
+
+ vms      VM[]
+}
+
+model Network {
+ id       Int @id @default(autoincrement())
+ name     String
+ cidr     String
+
+ tenantId Int
+ tenant   Tenant @relation(fields: [tenantId], references: [id])
+
+ vms      VM[]
+}
+
+model VM {
+ id          Int @id @default(autoincrement())
+ name        String
+
+ cpu         Int
+ ram         Int
+ disk        Int
+
+ status      String
+ ip          String?
+
+ containerId String?
+
+ tenantId    Int
+ tenant      Tenant @relation(fields: [tenantId], references: [id])
+
+ nodeId      Int?
+ node        ComputeNode? @relation(fields: [nodeId], references: [id])
+
+ networkId   Int?
+ network     Network? @relation(fields: [networkId], references: [id])
+}
