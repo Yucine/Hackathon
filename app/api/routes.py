@@ -1,5 +1,5 @@
 from fastapi import APIRouter
-
+from app.services.metrics_service import get_container_metrics
 from app.services.scheduler_service import schedule_vm
 from app.services.prediction_service import predict_load
 from app.services.anomaly_service import detect_anomaly
@@ -31,3 +31,15 @@ def cluster(data: dict):
 def metrics():
 
     return generate_metrics()
+
+@router.get("/metrics")
+def metrics():
+
+    return get_container_metrics()
+@router.get("/health")
+def health():
+
+    return {
+        "status":"ok",
+        "service":"ml"
+    }
