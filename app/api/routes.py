@@ -5,7 +5,14 @@ from app.services.prediction_service import predict_load
 from app.services.anomaly_service import detect_anomaly
 from app.services.cluster_service import analyze_cluster
 from app.services.metrics_service import generate_metrics
+
 router = APIRouter()
+from app.services.security_service import analyze_security
+
+@router.post("/security/analyze")
+def security(data: dict):
+
+    return analyze_security(data)
 
 
 @router.post("/schedule")
